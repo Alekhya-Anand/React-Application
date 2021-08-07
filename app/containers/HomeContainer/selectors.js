@@ -39,4 +39,5 @@ export const selectRepoName = () =>
     selectHomeContainerDomain,
     substate => get(substate, 'repoName', null)
   );
+
 export default selectHomeContainer;

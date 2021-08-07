@@ -12,10 +12,10 @@ import { injectIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import T from '@components/T';
 import Clickable from '@components/Clickable';
-import { injectSaga } from 'redux-injectors';
+import { useInjectSaga } from 'utils/injectSaga';
 import { selectHomeContainer, selectReposData, selectReposError, selectRepoName } from './selectors';
 import { homeContainerCreators } from './reducer';
-import homeContainerSaga from './saga';
+import saga from './saga';
 
 const { Search } = Input;
 
@@ -51,6 +51,7 @@ export function HomeContainer({
   maxwidth,
   padding
 }) {
+  useInjectSaga({ key: 'homeContainer', saga });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -80,8 +81,8 @@ export function HomeContainer({
   const debouncedHandleOnChange = debounce(handleOnChange, 200);
 
   const renderRepoList = () => {
-    const items = get(reposData, 'items', []);
-    const totalCount = get(reposData, 'totalCount', 0);
+    const items = get(reposData, 'results', []);
+    const totalCount = get(reposData, 'resultCount', 0);
     return (
       (items.length !== 0 || loading) && (
         <CustomCard>
@@ -98,9 +99,10 @@ export function HomeContainer({
             )}
             {items.map((item, index) => (
               <CustomCard key={index}>
-                <T id="repository_name" values={{ name: item.name }} />
-                <T id="repository_full_name" values={{ fullName: item.fullName }} />
-                <T id="repository_stars" values={{ stars: item.stargazersCount }} />
+                <T id="artist_name" values={{ name: item.artistName }} />
+                <T id="track_name" values={{ track: item.trackName }} />
+                <T id="track_url" values={{ url: item.trackViewUrl }} />
+                <T id="track_price" values={{ price: item.trackPrice }} />
               </CustomCard>
             ))}
           </Skeleton>
@@ -185,13 +187,15 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
 export default compose(
   injectIntl,
   withConnect,
-  memo,
-  injectSaga({ key: 'homeContainer', saga: homeContainerSaga })
+  memo
 )(HomeContainer);
 
 export const HomeContainerTest = compose(injectIntl)(HomeContainer);

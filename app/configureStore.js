@@ -9,7 +9,6 @@ import { persistStore, persistReducer } from 'redux-persist';
 import immutableTransform from 'redux-persist-transform-immutable';
 import storage from 'redux-persist/lib/storage';
 import createReducer from './reducers';
-import { createInjectorsEnhancer } from 'redux-injectors';
 
 // redux persit configuration
 const persistConfig = {
@@ -49,14 +48,11 @@ export default function configureStore(initialState = {}, history) {
   // 1. sagaMiddleware: Makes redux-sagas work
   // 2. routerMiddleware: Syncs the location/URL path to the state
   const middlewares = [sagaMiddleware, routerMiddleware(history)];
-  const enhancers = [applyMiddleware(...middlewares)];
-  const runSaga = sagaMiddleware.run;
-  const injectEnhancer = createInjectorsEnhancer({
-    createReducer,
-    runSaga
-  });
 
-  const store = createStore(persistedReducer, initialState, composeEnhancers(...enhancers, injectEnhancer));
+  const enhancers = [applyMiddleware(...middlewares)];
+
+  const store = createStore(persistedReducer, initialState, composeEnhancers(...enhancers));
+
   const persistor = persistStore(store);
 
   // Extensions
@@ -71,5 +67,6 @@ export default function configureStore(initialState = {}, history) {
       store.replaceReducer(createReducer(store.injectedReducers));
     });
   }
+
   return { store, persistor };
 }
